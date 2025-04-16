@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ProductCard from './ProductCard';
+import { API_URL } from '../config';
 
 interface Product {
   _id: string;
@@ -29,8 +30,7 @@ const Catalogue: React.FC<CatalogueProps> = ({ showAll = false }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Fetch all products if on products page or showAll is true, otherwise fetch featured products
-        const response = await fetch(`http://localhost:5000/api/products${isProductsPage || showAll ? '' : '/featured'}`);
+        const response = await fetch(`${API_URL}/api/products${isProductsPage || showAll ? '' : '/featured'}`);
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);
