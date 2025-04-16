@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface FormData {
@@ -7,6 +7,8 @@ interface FormData {
   phone: string;
   message: string;
 }
+
+const API_URL = 'http://localhost:5000/api/customer-queries';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -18,19 +20,59 @@ const Contact: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [generalProductId, setGeneralProductId] = useState<string>('');
+
+  useEffect(() => {
+    // Fetch the general product ID
+    const fetchGeneralProductId = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products/general');
+        if (!response.ok) {
+          throw new Error('Failed to fetch general product ID');
+        }
+        const data = await response.json();
+        setGeneralProductId(data._id);
+      } catch (error) {
+        console.error('Error fetching general product ID:', error);
+        setErrorMessage('Failed to initialize contact form. Please try again later.');
+      }
+    };
+
+    fetchGeneralProductId();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!generalProductId) {
+      setErrorMessage('Contact form is not ready. Please try again in a moment.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
     try {
-      // Replace with your actual form submission logic
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          productId: generalProductId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit message');
+      }
+
       setSubmitStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
       setSubmitStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,6 +146,7 @@ const Contact: React.FC = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  required
                   className="w-full p-3 rounded-lg border dark:bg-primary dark:border-gray-700"
                 />
               </div>
@@ -125,7 +168,7 @@ const Contact: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !generalProductId}
                 className="btn-primary w-full"
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -147,7 +190,7 @@ const Contact: React.FC = () => {
                   animate={{ opacity: 1 }}
                   className="text-red-600 text-center"
                 >
-                  Sorry, there was an error sending your message. Please try again.
+                  {errorMessage || 'Sorry, there was an error sending your message. Please try again.'}
                 </motion.p>
               )}
             </form>
@@ -187,7 +230,7 @@ const Contact: React.FC = () => {
             </div>
 
             {/* Google Maps Embed */}
-            <div className="h-64 rounded-lg overflow-hidden shadow-lg">
+            <div className="bg-white dark:bg-primary-light p-8 rounded-lg shadow-lg h-64">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d144.95373631531973!3d-37.817327679751734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d4c2b349649%3A0xb6899234e561db11!2sEnvato!5e0!3m2!1sen!2sus!4v1635167261304!5m2!1sen!2sus"
                 width="100%"

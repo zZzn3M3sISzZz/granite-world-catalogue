@@ -1,139 +1,119 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
 
-// Sample data - replace with actual data
-const sampleProducts = [
-  {
-    id: 1,
-    name: 'Black Galaxy',
-    description: 'A stunning black granite with golden specks that create a galaxy-like appearance.',
-    category: 'Black',
-    finish: 'Polished',
-    images: [
-      { url: '/products/black-galaxy-1.jpg', alt: 'Black Galaxy Granite' },
-      { url: '/products/black-galaxy-2.jpg', alt: 'Black Galaxy Granite Detail' },
-    ],
-    specs: [
-      { label: 'Origin', value: 'India' },
-      { label: 'Thickness', value: '20mm' },
-      { label: 'Finish', value: 'Polished' },
-      { label: 'Color', value: 'Black with golden specks' },
-    ],
-  },
-  // Add more sample products here
-];
+const API_URL = 'http://localhost:5000/api/products';
 
 const categories = ['All', 'Black', 'White', 'Brown', 'Gray', 'Green'];
 const finishes = ['All', 'Polished', 'Honed', 'Leathered', 'Brushed'];
+
+type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 const Catalogue: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedFinish, setSelectedFinish] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      const data = await response.json();
+      setProducts(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
-    return sampleProducts.filter((product) => {
+    return products.filter((product) => {
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesFinish = selectedFinish === 'All' || product.finish === selectedFinish;
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchesCategory && matchesFinish && matchesSearch;
+      return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, selectedFinish, searchQuery]);
+  }, [selectedCategory, searchQuery, products]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline"> {error}</span>
+      </div>
+    );
+  }
 
   return (
-    <section id="catalogue" className="section">
-      <div className="container">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-4xl font-bold text-center mb-12"
-        >
-          Our Catalogue
-        </motion.h2>
-
-        {/* Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 dark:bg-primary-light hover:bg-gray-200 dark:hover:bg-primary'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-4 justify-center">
-            {finishes.map((finish) => (
-              <button
-                key={finish}
-                onClick={() => setSelectedFinish(finish)}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  selectedFinish === finish
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 dark:bg-primary-light hover:bg-gray-200 dark:hover:bg-primary'
-                }`}
-              >
-                {finish}
-              </button>
-            ))}
-          </div>
-
-          <div className="max-w-md mx-auto">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-3 rounded-lg border dark:bg-primary-light dark:border-gray-700"
-            />
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          <AnimatePresence>
-            {filteredProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ProductCard {...product} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {filteredProducts.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
+    <div id="catalogue" className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Our Granite Collection</h1>
+        <div className="flex flex-wrap gap-4">
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
           >
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              No products found matching your criteria.
-            </p>
-          </motion.div>
-        )}
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence>
+          {filteredProducts.map((product) => (
+            <motion.div
+              key={product._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 };
 

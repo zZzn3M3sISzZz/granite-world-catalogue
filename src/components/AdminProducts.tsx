@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -19,20 +19,18 @@ type ProductFormData = {
   imageUrl: string;
 };
 
-// Mock data - replace with actual API calls
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Black Galaxy Granite',
-    description: 'Premium black granite with golden specks',
-    price: 99.99,
-    category: 'Black',
-    imageUrl: '/products/black-galaxy.jpg',
-  },
-];
+type Product = ProductFormData & {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const API_URL = 'http://localhost:5000/api/products';
 
 const AdminProducts: React.FC = () => {
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -42,20 +40,80 @@ const AdminProducts: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: ProductFormData) => {
-    // In a real application, you would make an API call here
-    const newProduct = {
-      id: products.length + 1,
-      ...data,
-    };
-    setProducts([...products, newProduct]);
-    reset();
+  // Fetch products
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      const data = await response.json();
+      setProducts(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    // In a real application, you would make an API call here
-    setProducts(products.filter((product) => product.id !== id));
+  const onSubmit = async (data: ProductFormData) => {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create product');
+      }
+
+      const newProduct = await response.json();
+      setProducts([newProduct, ...products]);
+      reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      setProducts(products.filter((product) => product._id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline"> {error}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -172,7 +230,7 @@ const AdminProducts: React.FC = () => {
                       </thead>
                       <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {products.map((product) => (
-                          <tr key={product.id}>
+                          <tr key={product._id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                               {product.name}
                             </td>
@@ -184,7 +242,7 @@ const AdminProducts: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                               <button
-                                onClick={() => handleDelete(product.id)}
+                                onClick={() => handleDelete(product._id)}
                                 className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                               >
                                 Delete

@@ -1,55 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl: string;
+};
 
 type Query = {
-  id: number;
+  _id: string;
   name: string;
   email: string;
   phone: string;
   message: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  date: string;
+  productId: Product;
+  status: 'pending' | 'responded' | 'closed';
+  createdAt: string;
+  updatedAt: string;
 };
 
-// Mock data - replace with actual API calls
-const mockQueries: Query[] = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '123-456-7890',
-    message: 'Interested in Black Galaxy Granite for kitchen countertops',
-    status: 'pending',
-    date: '2024-04-16',
-  },
-];
+const API_URL = 'http://localhost:5000/api/customer-queries';
 
 const AdminQueries: React.FC = () => {
-  const [queries, setQueries] = useState<Query[]>(mockQueries);
+  const [queries, setQueries] = useState<Query[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleStatusChange = (id: number, newStatus: Query['status']) => {
-    setQueries(
-      queries.map((query) =>
-        query.id === id ? { ...query, status: newStatus } : query
-      )
-    );
+  useEffect(() => {
+    fetchQueries();
+  }, []);
+
+  const fetchQueries = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer queries');
+      }
+      const data = await response.json();
+      setQueries(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setQueries(queries.filter((query) => query.id !== id));
+  const handleStatusChange = async (id: string, newStatus: Query['status']) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update query status');
+      }
+
+      const updatedQuery = await response.json();
+      setQueries(
+        queries.map((query) =>
+          query._id === id ? updatedQuery : query
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete query');
+      }
+
+      setQueries(queries.filter((query) => query._id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
   };
 
   const getStatusColor = (status: Query['status']) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'in-progress':
+      case 'responded':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'completed':
+      case 'closed':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline"> {error}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -73,6 +145,9 @@ const AdminQueries: React.FC = () => {
                           Contact
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Product
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           Message
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -85,9 +160,9 @@ const AdminQueries: React.FC = () => {
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {queries.map((query) => (
-                        <tr key={query.id}>
+                        <tr key={query._id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                            {query.date}
+                            {formatDate(query.createdAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                             {query.name}
@@ -96,27 +171,30 @@ const AdminQueries: React.FC = () => {
                             <div>{query.email}</div>
                             <div>{query.phone}</div>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                            {query.productId.name}
+                          </td>
                           <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
                             {query.message}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                             <select
                               value={query.status}
                               onChange={(e) =>
-                                handleStatusChange(query.id, e.target.value as Query['status'])
+                                handleStatusChange(query._id, e.target.value as Query['status'])
                               }
                               className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md ${getStatusColor(
                                 query.status
                               )}`}
                             >
                               <option value="pending">Pending</option>
-                              <option value="in-progress">In Progress</option>
-                              <option value="completed">Completed</option>
+                              <option value="responded">Responded</option>
+                              <option value="closed">Closed</option>
                             </select>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                             <button
-                              onClick={() => handleDelete(query.id)}
+                              onClick={() => handleDelete(query._id)}
                               className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             >
                               Delete
