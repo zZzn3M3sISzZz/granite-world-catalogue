@@ -13,6 +13,11 @@ import AdminQueries from './components/AdminQueries';
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(() => {
+    // Check localStorage on initial load
+    const stored = localStorage.getItem('heroAnimated');
+    return stored === 'true';
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +27,11 @@ function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Save animation state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('heroAnimated', hasAnimated.toString());
+  }, [hasAnimated]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -35,7 +45,7 @@ function App() {
         onToggleDarkMode={toggleDarkMode}
         isScrolled={isScrolled}
       />
-      <Hero />
+      <Hero hasAnimated={hasAnimated} setHasAnimated={setHasAnimated} />
       <Catalogue />
       <About />
       <Contact />

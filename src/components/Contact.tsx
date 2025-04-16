@@ -218,7 +218,7 @@ const Contact: React.FC = () => {
                 </p>
                 <p className="flex items-start">
                   <span className="w-6 h-6 mr-2">✉️</span>
-                  info@graniteworld.com
+                  graniteworldchennai@gmail.com
                 </p>
                 <p className="flex items-start">
                   <span className="w-6 h-6 mr-2">🕒</span>
