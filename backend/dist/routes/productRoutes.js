@@ -26,6 +26,19 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Error fetching products' });
     }
 }));
+// Get featured products (limited to 5)
+router.get('/featured', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const featuredProducts = yield Product_1.default.find({
+            featured: true,
+            name: { $ne: 'General Inquiry' }
+        }).limit(5);
+        res.json(featuredProducts);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching featured products' });
+    }
+}));
 // Get general product
 router.get('/general', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -66,7 +79,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Update product
 router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield Product_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const product = yield Product_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }

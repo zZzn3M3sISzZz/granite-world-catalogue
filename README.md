@@ -1,65 +1,85 @@
-# The Granite World Catalogue
+# Granite World Catalogue
 
-A modern, responsive online catalogue website for The Granite World showroom. Built with React, TailwindCSS, and Framer Motion.
+A modern web application for showcasing granite products and managing customer inquiries.
 
 ## Features
 
-- 🎨 Modern, responsive design with dark/light mode
-- 🖼️ Animated product catalogue with filtering
-- 📱 Mobile-friendly interface
-- 🎭 Smooth animations and transitions
-- 📝 Contact form with Google Maps integration
-- 🌓 Dark/Light mode toggle
+- Product catalogue with detailed product information
+- Dark/Light mode support
+- Contact form for customer inquiries
+- Admin panel for managing products and inquiries
+- Image gallery with filtering capabilities
+- Responsive design for all devices
 
 ## Tech Stack
 
-- React
-- TypeScript
-- TailwindCSS
-- Framer Motion
-- Heroicons
-- Headless UI
+- Frontend:
+  - React with TypeScript
+  - Tailwind CSS for styling
+  - Framer Motion for animations
+  - React Router for navigation
+
+- Backend:
+  - Node.js with Express
+  - MongoDB for database
+  - TypeScript
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB
+
+### Installation
+
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/your-username/granite-world-catalogue.git
 cd granite-world-catalogue
 ```
 
-2. Install dependencies:
+2. Install dependencies for frontend:
 ```bash
 npm install
 ```
 
-3. Start the development server:
+3. Install dependencies for backend:
+```bash
+cd backend
+npm install
+```
+
+4. Create `.env` files:
+
+Frontend `.env`:
+```
+VITE_API_URL=http://localhost:5000
+```
+
+Backend `.env`:
+```
+MONGODB_URI=your_mongodb_uri
+PORT=5000
+```
+
+5. Start the development servers:
+
+Frontend:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-## Project Structure
-
-```
-src/
-  ├── components/     # Reusable UI components
-  ├── pages/         # Page components
-  ├── hooks/         # Custom React hooks
-  ├── utils/         # Utility functions
-  ├── assets/        # Static assets
-  └── styles/        # Global styles
+Backend:
+```bash
+cd backend
+npm run dev
 ```
 
-## Contributing
+## Deployment
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+This project is configured for deployment on Vercel. The frontend and backend are deployed as separate projects.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+MIT 
