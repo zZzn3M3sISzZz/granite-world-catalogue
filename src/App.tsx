@@ -8,7 +8,6 @@ import Gallery from './components/Gallery';
 import AdminPanel from './components/AdminPanel';
 import AdminLogin from './components/AdminLogin';
 import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
-import { motion } from 'framer-motion';
 
 const Navigation: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
