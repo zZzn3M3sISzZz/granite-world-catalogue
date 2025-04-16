@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import productRoutes from './routes/productRoutes';
 import customerQueryRoutes from './routes/customerQueryRoutes';
+import galleryRoutes from './routes/galleryRoutes';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/customer-queries', customerQueryRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 // Basic test route
 app.get('/', (req, res) => {

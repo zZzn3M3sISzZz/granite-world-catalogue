@@ -9,6 +9,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
 const customerQueryRoutes_1 = __importDefault(require("./routes/customerQueryRoutes"));
+const galleryRoutes_1 = __importDefault(require("./routes/galleryRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Middleware
@@ -17,6 +18,7 @@ app.use(express_1.default.json());
 // Routes
 app.use('/api/products', productRoutes_1.default);
 app.use('/api/customer-queries', customerQueryRoutes_1.default);
+app.use('/api/gallery', galleryRoutes_1.default);
 // Basic test route
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Granite World Catalogue API' });
