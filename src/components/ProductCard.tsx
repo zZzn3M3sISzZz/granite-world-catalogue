@@ -27,8 +27,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -38,7 +36,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
+    setSubmitStatus('idle');
+    setErrorMessage('');
 
     const formData = new FormData(e.target as HTMLFormElement);
     const inquiryData = {
@@ -60,10 +59,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       if (!response.ok) throw new Error('Failed to submit inquiry');
       
-      setSubmitSuccess(true);
+      setSubmitStatus('success');
       (e.target as HTMLFormElement).reset();
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setSubmitStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
