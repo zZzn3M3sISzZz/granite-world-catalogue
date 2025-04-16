@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-
-const API_URL = 'http://localhost:5000/api/gallery';
+import { API_URL } from '../config';
 
 type GalleryPost = {
   _id: string;
@@ -35,7 +34,7 @@ const AdminGallery: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(`${API_URL}/api/gallery`);
       if (!response.ok) {
         throw new Error('Failed to fetch gallery posts');
       }
@@ -67,15 +66,14 @@ const AdminGallery: React.FC = () => {
       };
       
       const url = editingPost 
-        ? `${API_URL}/${editingPost._id}` 
-        : API_URL;
+        ? `${API_URL}/api/gallery/${editingPost._id}` 
+        : `${API_URL}/api/gallery`;
       
       const method = editingPost ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
         },
         body: JSON.stringify(postData),
@@ -119,7 +117,7 @@ const AdminGallery: React.FC = () => {
     }
     
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await fetch(`${API_URL}/api/gallery/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,

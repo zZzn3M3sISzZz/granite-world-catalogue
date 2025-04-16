@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { API_URL } from '../config';
 
-type Product = {
+interface Product {
   _id: string;
   name: string;
   description: string;
   price: number;
   category: string;
   imageUrl: string;
-  createdAt: string;
-  updatedAt: string;
-};
+  featured: boolean;
+}
 
 interface ProductCardProps {
   product: Product;
 }
-
-const API_URL = 'http://localhost:5000/api/customer-queries';
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -29,42 +27,43 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus('idle');
-    
+    setError(null);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const inquiryData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      message: formData.get('message'),
+      productId: product._id
+    };
+
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/api/customer-queries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          productId: product._id,
-        }),
+        body: JSON.stringify(inquiryData),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit query');
-      }
-
-      setSubmitStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
-      setTimeout(() => {
-        setIsFormOpen(false);
-        setSubmitStatus('idle');
-      }, 2000);
-    } catch (error) {
-      setSubmitStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+      if (!response.ok) throw new Error('Failed to submit inquiry');
+      
+      setSubmitSuccess(true);
+      (e.target as HTMLFormElement).reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -112,7 +111,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             exit={{ opacity: 0, height: 0 }}
             className="mt-6 space-y-4"
           >
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleInquiry} className="space-y-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Name

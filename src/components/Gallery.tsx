@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const API_URL = 'http://localhost:5000/api/gallery';
+import { API_URL } from '../config';
 
 type GalleryPost = {
   _id: string;
@@ -24,23 +23,21 @@ const Gallery: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(filter === 'featured' ? `${API_URL}/featured` : API_URL);
-      if (!response.ok) {
-        throw new Error('Failed to fetch gallery posts');
+    const fetchImages = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/gallery`);
+        if (!response.ok) throw new Error('Failed to fetch gallery images');
+        const data = await response.json();
+        setPosts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      setPosts(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchImages();
+  }, []);
 
   // Get all unique tags from posts
   const allTags = Array.from(

@@ -1,41 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { API_URL } from '../config';
 
-interface FormData {
+interface ContactFormData {
   name: string;
   email: string;
   phone: string;
   message: string;
+  productId: string;
 }
 
-const API_URL = 'http://localhost:5000/api/customer-queries';
-
 const Contact: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
     message: '',
+    productId: ''
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [generalProductId, setGeneralProductId] = useState<string>('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generalProductId, setGeneralProductId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch the general product ID
     const fetchGeneralProductId = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/products/general');
-        if (!response.ok) {
-          throw new Error('Failed to fetch general product ID');
-        }
+        const response = await fetch(`${API_URL}/api/products/general`);
+        if (!response.ok) throw new Error('Failed to fetch general product');
         const data = await response.json();
         setGeneralProductId(data._id);
-      } catch (error) {
-        console.error('Error fetching general product ID:', error);
-        setErrorMessage('Failed to initialize contact form. Please try again later.');
+      } catch (err) {
+        setError('Error fetching general product ID');
+        console.error('Error fetching general product ID:', err);
       }
     };
 
@@ -45,34 +42,37 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!generalProductId) {
-      setErrorMessage('Contact form is not ready. Please try again in a moment.');
+      setError('System is not ready to accept submissions');
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitStatus('idle');
+    setError(null);
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/api/customer-queries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
-          productId: generalProductId,
+          productId: generalProductId
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit message');
-      }
-
-      setSubmitStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (error) {
-      setSubmitStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+      if (!response.ok) throw new Error('Failed to submit form');
+      
+      setSubmitSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+        productId: ''
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -174,7 +174,7 @@ const Contact: React.FC = () => {
                 {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
 
-              {submitStatus === 'success' && (
+              {submitSuccess && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -184,13 +184,13 @@ const Contact: React.FC = () => {
                 </motion.p>
               )}
 
-              {submitStatus === 'error' && (
+              {error && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-red-600 text-center"
                 >
-                  {errorMessage || 'Sorry, there was an error sending your message. Please try again.'}
+                  {error}
                 </motion.p>
               )}
             </form>
