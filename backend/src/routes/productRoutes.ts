@@ -14,6 +14,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get featured products (limited to 5)
+router.get('/featured', async (req, res) => {
+  try {
+    const featuredProducts = await Product.find({ 
+      featured: true,
+      name: { $ne: 'General Inquiry' } 
+    }).limit(5);
+    res.json(featuredProducts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching featured products' });
+  }
+});
+
 // Get general product
 router.get('/general', async (req, res) => {
   try {
@@ -54,7 +67,11 @@ router.post('/', async (req, res) => {
 // Update product
 router.put('/:id', async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }

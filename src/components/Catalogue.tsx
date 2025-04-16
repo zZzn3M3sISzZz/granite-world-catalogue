@@ -1,136 +1,103 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import ProductCard from './ProductCard';
 
-const API_URL = 'http://localhost:5000/api/products';
-
-const categories = ['All', 'Black', 'White', 'Brown', 'Gray', 'Green'];
-const finishes = ['All', 'Polished', 'Honed', 'Leathered', 'Brushed'];
-
-type Product = {
+interface Product {
   _id: string;
   name: string;
   description: string;
   price: number;
   category: string;
   imageUrl: string;
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
-};
+}
 
-const Catalogue: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedFinish, setSelectedFinish] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+interface CatalogueProps {
+  showAll?: boolean;
+}
+
+const Catalogue: React.FC<CatalogueProps> = ({ showAll = false }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const isProductsPage = location.pathname === '/products';
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
+    const fetchProducts = async () => {
+      try {
+        // Fetch all products if on products page or showAll is true, otherwise fetch featured products
+        const response = await fetch(`http://localhost:5000/api/products${isProductsPage || showAll ? '' : '/featured'}`);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      setProducts(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
-    }
-  };
+    };
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesCategory && matchesSearch;
-    });
-  }, [selectedCategory, searchQuery, products]);
+    fetchProducts();
+  }, [isProductsPage, showAll]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-        <strong className="font-bold">Error!</strong>
-        <span className="block sm:inline"> {error}</span>
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="text-red-500">{error}</div>
       </div>
     );
   }
 
   return (
-    <motion.div 
-      id="catalogue" 
-      className="container mx-auto px-4 py-8"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.div 
-        className="mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Granite Collection</h1>
-        <div className="flex flex-wrap gap-4">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+            {isProductsPage ? 'All Products' : 'Our Products'}
+          </h2>
+          <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">
+            Discover our selection of high-quality granite products
+          </p>
         </div>
-      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence mode="wait">
-          {filteredProducts.map((product, index) => (
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
             <motion.div
               key={product._id}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ 
-                duration: 0.5,
-                delay: index * 0.1,
-                ease: "easeOut"
-              }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
               <ProductCard product={product} />
             </motion.div>
           ))}
-        </AnimatePresence>
+        </div>
+
+        {/* Show View All button only on the main page */}
+        {!isProductsPage && !showAll && (
+          <div className="mt-12 text-center">
+            <Link
+              to="/products"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              View All Products
+            </Link>
+          </div>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

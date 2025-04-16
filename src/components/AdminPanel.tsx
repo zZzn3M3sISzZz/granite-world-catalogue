@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import AdminGallery from './AdminGallery';
 
 interface Product {
@@ -9,6 +10,7 @@ interface Product {
   price: number;
   category: string;
   imageUrl: string;
+  featured: boolean;
 }
 
 interface CustomerQuery {
@@ -27,6 +29,7 @@ const AdminPanel: React.FC = () => {
   const [queries, setQueries] = useState<CustomerQuery[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { logout } = useAdminAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -50,6 +53,10 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
+
   const handleDeleteProduct = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     
@@ -61,6 +68,27 @@ const AdminPanel: React.FC = () => {
       setProducts(products.filter(product => product._id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete product');
+    }
+  };
+
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ featured: !currentFeatured }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to update product');
+      
+      const updatedProduct = await response.json();
+      setProducts(products.map(product => 
+        product._id === id ? updatedProduct : product
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update product');
     }
   };
 
@@ -83,6 +111,15 @@ const AdminPanel: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h2>
+              <button
+                onClick={logout}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Sign Out
+              </button>
+            </div>
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="-mb-px flex space-x-8">
                 <button
@@ -163,12 +200,24 @@ const AdminPanel: React.FC = () => {
                                   {product.category}
                                 </span>
                               </div>
-                              <button
-                                onClick={() => handleDeleteProduct(product._id)}
-                                className="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                              >
-                                Delete
-                              </button>
+                              <div className="mt-4 flex space-x-2">
+                                <button
+                                  onClick={() => handleToggleFeatured(product._id, product.featured)}
+                                  className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${
+                                    product.featured
+                                      ? 'bg-green-600 text-white hover:bg-green-700'
+                                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500'
+                                  }`}
+                                >
+                                  {product.featured ? 'Featured' : 'Mark as Featured'}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(product._id)}
+                                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </div>
                           </motion.div>
                         ))}
