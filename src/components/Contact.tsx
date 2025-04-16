@@ -86,13 +86,13 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="section">
+    <section id="contact" className="section bg-white dark:bg-gray-900">
       <div className="container">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl font-bold text-center mb-12"
+          className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white"
         >
           Contact Us
         </motion.h2>
@@ -103,11 +103,11 @@ const Contact: React.FC = () => {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-white dark:bg-primary-light p-8 rounded-lg shadow-lg"
+            className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name
                 </label>
                 <input
@@ -117,12 +117,12 @@ const Contact: React.FC = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border dark:bg-primary dark:border-gray-700"
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email
                 </label>
                 <input
@@ -132,12 +132,12 @@ const Contact: React.FC = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border dark:bg-primary dark:border-gray-700"
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Phone
                 </label>
                 <input
@@ -147,29 +147,29 @@ const Contact: React.FC = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border dark:bg-primary dark:border-gray-700"
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Message
                 </label>
                 <textarea
                   id="message"
                   name="message"
+                  rows={4}
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={4}
-                  className="w-full p-3 rounded-lg border dark:bg-primary dark:border-gray-700"
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={isSubmitting || !generalProductId}
-                className="btn-primary w-full"
+                disabled={isSubmitting}
+                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors duration-200"
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
@@ -203,11 +203,11 @@ const Contact: React.FC = () => {
             viewport={{ once: true }}
             className="space-y-8"
           >
-            <div className="bg-white dark:bg-primary-light p-8 rounded-lg shadow-lg">
-              <h3 className="text-2xl font-display font-bold mb-6">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+              <h3 className="text-2xl font-display font-bold mb-6 text-gray-900 dark:text-white">
                 Visit Our Showroom
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-4 text-gray-700 dark:text-gray-300">
                 <p className="flex items-start">
                   <span className="w-6 h-6 mr-2">📍</span>
                   No. 490, Omakulammedu, M.R.H Road, Madhavaram, Chennai - 600060 (Madhavaram Roundtana)
@@ -230,9 +230,9 @@ const Contact: React.FC = () => {
             </div>
 
             {/* Google Maps Embed */}
-            <div className="bg-white dark:bg-primary-light p-8 rounded-lg shadow-lg h-64">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg h-64">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d144.95373631531973!3d-37.817327679751734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d4c2b349649%3A0xb6899234e561db11!2sEnvato!5e0!3m2!1sen!2sus!4v1635167261304!5m2!1sen!2sus"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.068697599319!2d80.22349187580836!3d13.158066687174731!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a5264db9b4e9f3b%3A0x850eb644b841aee1!2sGranite%20World!5e0!3m2!1sen!2sin!4v1744816110588!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

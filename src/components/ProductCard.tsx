@@ -90,8 +90,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.description}
         </p>
         <div className="flex justify-between items-center mb-6">
-          <span className="text-primary font-bold text-lg">
-            ${product.price.toFixed(2)}
+          <span className="text-indigo-600 dark:text-indigo-400 font-bold text-lg">
+            ₹{product.price.toFixed(2)}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
             {product.category}
@@ -100,7 +100,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors font-medium"
+          className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
         >
           {isFormOpen ? 'Close Inquiry Form' : 'Inquire About This Product'}
         </button>
@@ -124,7 +124,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 p-2"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
               
@@ -139,7 +139,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 p-2"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
               
@@ -154,7 +154,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 p-2"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
               
@@ -165,11 +165,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <textarea
                   id="message"
                   name="message"
+                  rows={3}
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 p-2"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
               </div>
               
@@ -188,9 +188,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 font-medium"
+                className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors font-medium disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Inquiry'}
+                {isSubmitting ? 'Sending...' : 'Send Inquiry'}
               </button>
             </form>
           </motion.div>

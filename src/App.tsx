@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import Hero from './components/Hero';
 import Catalogue from './components/Catalogue';
 import Contact from './components/Contact';
@@ -10,6 +11,26 @@ import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
 import { motion } from 'framer-motion';
 
 const Navigation: React.FC = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('darkMode') === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', isDarkMode.toString());
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,6 +67,19 @@ const Navigation: React.FC = () => {
                 Contact
               </Link>
             </div>
+          </div>
+          <div className="flex items-center">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? (
+                <SunIcon className="h-6 w-6" />
+              ) : (
+                <MoonIcon className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
       </div>

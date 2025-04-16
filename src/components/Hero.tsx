@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import bannerImage from '../resources/granite_world_banner.jpg';
 
 interface HeroProps {
   hasAnimated: boolean;
@@ -53,7 +54,7 @@ const Hero: React.FC<HeroProps> = ({ hasAnimated, setHasAnimated }) => {
         initial={{ opacity: hasAnimated ? 1 : 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: hasAnimated ? 0 : 1 }}
-        className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent z-10" 
+        className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/30 z-10" 
       />
       
       {/* Background image */}
@@ -63,12 +64,12 @@ const Hero: React.FC<HeroProps> = ({ hasAnimated, setHasAnimated }) => {
         transition={{ duration: hasAnimated ? 0 : 1.5, ease: "easeOut" }}
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url("/hero-bg.jpg")',
+          backgroundImage: `url(${bannerImage})`,
         }}
       />
 
       {/* Content */}
-      <motion.div 
+      <motion.div
         className="container relative z-20 text-center"
         {...getAnimationProps()}
       >
